@@ -20,8 +20,8 @@ public class StopWatch {
     private static final ConcurrentHashMap<String, AtomicLong> timingStats = new ConcurrentHashMap<>();
 
     // Logging control
-    private static boolean loggingEnabled = false;
-    private static BiConsumer<String, String> logger = (operation, message) -> System.out.println("[StopWatch] " + operation + ": " + message);
+    private static volatile boolean loggingEnabled = false;
+    private static volatile BiConsumer<String, String> logger = (operation, message) -> System.out.println("[StopWatch] " + operation + ": " + message);
 
     /**
      * Enables logging of start and stop operations.
@@ -65,6 +65,9 @@ public class StopWatch {
      * @return The current StopWatch instance for method chaining
      */
     public static StopWatch start(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("StopWatch.start name must not be null or blank");
+        }
         TimingContext context = CURRENT_CONTEXT.get();
         context.startTiming(name);
 
@@ -155,7 +158,9 @@ public class StopWatch {
 
         public long stopTiming() {
             if (currentNode == rootNode) {
-                return 0; // Nothing to stop
+                // Nothing to stop: clear lastStoppedNodeName to avoid misleading logs
+                lastStoppedNodeName = null;
+                return 0;
             }
 
             // Save the name before stopping
@@ -175,6 +180,9 @@ public class StopWatch {
         }
 
         public long getElapsedTime() {
+            if (currentNode == rootNode) {
+                return 0L;
+            }
             return currentNode.getElapsedTime();
         }
 
