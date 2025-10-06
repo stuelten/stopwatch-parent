@@ -1,6 +1,7 @@
 package de.sty.stopwatch;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -120,7 +121,7 @@ public class StopWatch {
      * @return A map of operation names to their total elapsed times
      */
     public static Map<String, Long> getStats() {
-        Map<String, Long> stats = new HashMap<>();
+        Map<String, Long> stats = new LinkedHashMap<>();
         timingStats.forEach((key, value) -> stats.put(key, value.get()));
         return stats;
     }
